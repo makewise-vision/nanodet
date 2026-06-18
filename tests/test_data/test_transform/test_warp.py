@@ -1,10 +1,13 @@
 import copy
 
+import cv2
 import numpy as np
 
+from nanodet.data.dataset import build_dataset
 from nanodet.data.transform.warp import (
     ShapeTransform,
     get_flip_matrix,
+    get_vertical_flip_matrix,
     get_perspective_matrix,
     get_rotation_matrix,
     get_scale_matrix,
@@ -13,6 +16,7 @@ from nanodet.data.transform.warp import (
     get_translate_matrix,
     warp_and_resize,
 )
+from nanodet.util import load_config, cfg
 
 
 def test_get_matrix():
@@ -42,6 +46,9 @@ def test_get_matrix():
     C = Sh @ C
 
     F = get_flip_matrix(0.5)
+    C = F @ C
+
+    F = get_vertical_flip_matrix(0.5)
     C = F @ C
 
     T = get_translate_matrix(0.5, width, height)
@@ -99,3 +106,23 @@ def test_shape_transform():
     transform = ShapeTransform(keep_ratio=False)
     res = transform(dummy_meta, dst_shape=(50, 50))
     assert np.array_equal(res["gt_bboxes"], np.array([[0, 0, 5, 10]], dtype=np.float32))
+
+
+if __name__ == '__main__':
+    load_config(cfg, "../../../config/nanodet-plus-m-1.5x_416-plates4.yml")
+
+    dataset = build_dataset(cfg.data.train, "train")
+
+    while True:
+        meta = dataset.get_train_data(dataset.get_another_id())
+
+        img = meta["img"].cpu().permute(1, 2, 0).numpy()
+        for bbox in meta["gt_bboxes"]:
+            x1, y1, x2, y2 = bbox.astype(int)
+            cv2.rectangle(img, (x1, y1), (x2, y2), (0, 255, 0), 2)
+
+        cv2.imshow("img", img)
+        ch = cv2.waitKey(1000)
+        if ch == 27 or ch == ord("q") or ch == ord("Q"):
+            break
+

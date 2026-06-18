@@ -14,5 +14,5 @@ tensorboard
 termcolor
 torch>=1.10,<2.0
 torchmetrics
-torchvision
+torchvision==0.14
 tqdm

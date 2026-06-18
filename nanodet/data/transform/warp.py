@@ -27,6 +27,13 @@ def get_flip_matrix(prob=0.5):
     return F
 
 
+def get_vertical_flip_matrix(prob=0.5):
+    F = np.eye(3)
+    if random.random() < prob:
+        F[1, 1] = -1
+    return F
+
+
 def get_perspective_matrix(perspective=0.0):
     """
 
@@ -171,6 +178,9 @@ def warp_and_resize(
     if "flip" in warp_kwargs:
         F = get_flip_matrix(warp_kwargs["flip"])
         C = F @ C
+    if "vertical_flip" in warp_kwargs:
+        Fv = get_vertical_flip_matrix(warp_kwargs["vertical_flip"])
+        C = Fv @ C
     if "translate" in warp_kwargs and random.randint(0, 1):
         T = get_translate_matrix(warp_kwargs["translate"], width, height)
     else:
@@ -279,6 +289,7 @@ class ShapeTransform:
         shear: Random shear degree.
         translate: Random translate ratio.
         flip: Random flip probability.
+        vertical_flip: Random vertical flip probability.
     """
 
     def __init__(
@@ -292,6 +303,7 @@ class ShapeTransform:
         shear: float = 0.0,
         translate: float = 0.0,
         flip: float = 0.0,
+        vertical_flip: float = 0.0,
         **kwargs
     ):
         self.keep_ratio = keep_ratio
@@ -302,6 +314,7 @@ class ShapeTransform:
         self.rotation_degree = rotation
         self.shear_degree = shear
         self.flip_prob = flip
+        self.vertical_flip_prob = vertical_flip
         self.translate_ratio = translate
 
     def __call__(self, meta_data, dst_shape):
@@ -330,6 +343,9 @@ class ShapeTransform:
         C = Sh @ C
 
         F = get_flip_matrix(self.flip_prob)
+        C = F @ C
+
+        F = get_vertical_flip_matrix(self.vertical_flip_prob)
         C = F @ C
 
         T = get_translate_matrix(self.translate_ratio, width, height)
