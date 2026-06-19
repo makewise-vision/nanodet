@@ -169,7 +169,7 @@ class NanoDetPlusHead(nn.Module):
 
         input_height, input_width = gt_meta["img"].shape[2:]
         featmap_sizes = [
-            (math.ceil(input_height / stride), math.ceil(input_width) / stride)
+            (math.ceil(input_height / stride), math.ceil(input_width / stride))
             for stride in self.strides
         ]
         # get grid cells of one image
@@ -477,7 +477,7 @@ class NanoDetPlusHead(nn.Module):
         input_shape = (input_height, input_width)
 
         featmap_sizes = [
-            (math.ceil(input_height / stride), math.ceil(input_width) / stride)
+            (math.ceil(input_height / stride), math.ceil(input_width / stride))
             for stride in self.strides
         ]
         # get grid cells of one image
